@@ -1,6 +1,6 @@
-Northwind- A UI to interact with a database. 
+# Northwind- A UI to interact with a database. 
 
-Installation Instructions 
+# Installation Instructions 
 - Machine used is a mac running the latest version of MacOS
 
 # Install Python 
@@ -14,16 +14,10 @@ Installation Instructions
     $ pip3 install mysql
     ```
 
-# Install mysql dependencies 
+# Install Python dependencies 
+- Navigate to the requirements.txt file in northwind project folder.
     ```
-    $ pip3 install mysql-connector-python
-    $ pip3 install mysql-python
-    ```
-
-# Install Python packages needed 
-    ```
-    $ pip3 install numpy
-    $ pip3 install pandas
+    pip3 install -r requirements.txt
     ```
 
 # Create Database
@@ -45,4 +39,4 @@ Installation Instructions
     mysql> FLUSH PRIVILEGES;
     ```
 
-Run Instructions 
+# Run Instructions 

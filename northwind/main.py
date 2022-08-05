@@ -37,13 +37,13 @@ def main():
                     query = AddCustomer(cursor)
                     if query == False: pass 
                     else:
-                        if commit(query, None) == True: print(f'\nCustomer has been added.\n')
-                        else: print(f'\nFailed to add customer.\n')
+                        if commit(query) == True: print(f'\nCustomer has been added.')
+                        else: print(f'\nFailed to add customer.')
 
                 elif choice == 2: 
                     order_detail_query, order_query, product_queries = AddOrder(cursor)
                     if order_detail_query == False or order_query == False or product_queries == False:
-                        print(f'\nThere was an error submitting the order.\n')
+                        print(f'\nThere was an error submitting the order.')
                     else: 
                         try: 
                             cursor.execute('START TRANSACTION')
@@ -54,14 +54,14 @@ def main():
                                 cursor.execute(i)
                             db.commit()
                         except Exception as e:
-                            print(f'{e}\nCannot submit order.\n')
+                            print(f'{e}\nCannot submit order.')
                         else: 
-                            print("\nSuccessfully submitted order!\n")
+                            print("\nSuccessfully submitted order!")
 
                 elif choice == 3:
                     orderQuery, orderDetailQuery = RemoveOrder(cursor) 
                     if orderQuery == None or orderDetailQuery == None or orderDetailQuery == False or orderQuery == False: 
-                        print("\nCannot remove order\n")
+                        print("\nCannot remove order")
                     else:
                         try: 
                             cursor.execute('START TRANSACTION')
@@ -70,23 +70,35 @@ def main():
                             db.commit()
                         except Exception as e: 
                             print(e)
-                            print("\nCannot remove order.\n")
+                            print("\nCannot remove order.")
                 
                 elif choice == 4:
                     query = ShipOrder(cursor)
+                    if query == False: pass 
+                    else: 
+                        if commit(query) == True: print("\nSuccessfully shipped order!")
+                        else: print("\nFailed to send order to shipping. ")
 
                 elif choice == 5:
                     query = PrintPendingOrders(cursor)
                     if query == True: pass 
-                    else: print("\nThere was an error displaying the pending orders.\n")
+                    else: print("\nThere was an error displaying the pending orders.")
                 
                 elif choice == 6: 
-                    RestockParts(cursor)
+                    query = RestockProducts(cursor)
+                    if query == False: pass 
+                    else:
+                        if commit(query) == True: print("\nSuccessfully updated the inventory!")
+                        else: print("\nFailed to update inventory. ")
 
                 elif choice == 7:
                     choice = MoreOptions()
                     if choice == 1: 
-                        query = DisplayAllProducts(cursor)
+                        DisplayAllProducts(cursor)
+                    elif choice == 2:
+                        DisplayCustByCompName(cursor)
+                    elif choice == 3: 
+                        DisplayEmployeeInfo(cursor)
 
                 elif choice == 8:
                     break 

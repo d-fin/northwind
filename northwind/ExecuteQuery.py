@@ -38,7 +38,7 @@ def AddCustomer(cursor):
         id = id.upper()
         
         q1 = 'INSERT INTO Customers (CustomerID, CompanyName, ContactName, ContactTitle, Address, City, PostalCode, Country, Phone, Fax)'
-        q2 = f'VALUES("{id}", "{companyName}", "{contactName}", "{contactTitle}", "{address[0]}", "{address[1]}", "{address[2]}", "{address[3]}", "{phone}", "{fax}");'
+        q2 = f'VALUES("{id}", "{companyName.title()}", "{contactName.title()}", "{contactTitle.title()}", "{address[0]}", "{address[1]}", "{address[2]}", "{address[3]}", "{phone}", "{fax}");'
     
     except Exception as e:
         print(e)
@@ -172,7 +172,37 @@ def RemoveOrder(cursor):
      
 
 def ShipOrder(cursor):
-    return 
+    try:
+        query = f'SELECT OrderID, CustomerID, EmployeeID, OrderDate FROM orders WHERE ShippedDate IS NULL;'
+        cursor.execute(query)
+        df = pd.DataFrame(cursor.fetchall(), columns=['OID', 'CID', 'EID', 'Order Date'])
+        print("\n")
+        print(df)
+
+    except Exception as e: print(e)
+
+    else: 
+        try: 
+            while True: 
+                print(f'\nEnter order ID for order being shipped today: (or 0 to quit)')
+                id = int(input())
+
+                if id == 0: return False 
+
+                exists = False 
+                for i in range(len(df['OID'])):
+                    if df['OID'][i] == id: exists = True 
+
+                if exists == False: 
+                    print("\nID entered does not need to be shipped.")
+                else: 
+                    today = datetime.datetime.today()
+                    today = today.strftime("%Y-%m-%d %H:%M:%S")
+                    query = f'UPDATE orders SET ShippedDate=\'{today}\' WHERE OrderID={id};'
+                    return query 
+        except Exception as e: print(e)
+
+     
 
 def PrintPendingOrders(cursor):
     try: 
@@ -203,8 +233,43 @@ def PrintPendingOrders(cursor):
 
             return True 
     
-def RestockParts(cursor):
-    return
+def RestockProducts(cursor):
+    while True:
+        try:   
+            print("1. Display all products: ")
+            print("2. Enter product ID to restock: ")
+            choice = int(input())
+        except Exception as e:
+            print(f'{e}\nEnter a valid option. ')
+        
+        else: 
+            if choice == 1:
+                DisplayAllProducts(cursor)
+            else:
+                while True: 
+                    try:
+                        id = int(input("Enter product ID for product to be restocked: "))
+                        query = f'SELECT ProductID, ProductName, QuantityPerUnit, UnitsInStock, Discontinued FROM products WHERE ProductID={id};'
+                        cursor.execute(query)
+                        row = cursor.fetchone()
+                        if row == None: raise Exception("\nProduct ID does not exist. ")
+                        else:
+                            if row[4] == 'n':
+                                query = f'SELECT ProductID, ProductName, QuantityPerUnit, UnitsInStock, Discontinued FROM products WHERE ProductID={id};'
+                                cursor.execute(query)
+                                df = pd.DataFrame(cursor.fetchall(), columns=['PID', 'Name', 'Quantity/Unit', 'Current Stock', 'Discontinued'])
+                                print("\n")
+                                print(df)
+                                restockQuantity = int(input("\nEnter quantity to be restocked: "))
+                                query = f'UPDATE products SET UnitsInStock=UnitsInstock+{restockQuantity} WHERE ProductID={id};'
+                                return query 
+                            else: 
+                                print("\nThis product is discontinued - No need to restock. ")
+                                return False
+                                
+                    except Exception as e: 
+                        print(f'{e}')
+                        return False 
 
 def DisplayAllProducts(cursor):
     try: 
@@ -212,15 +277,95 @@ def DisplayAllProducts(cursor):
         df = pd.DataFrame(cursor.fetchall(), columns=['PID', 'Product Name', 'SID', 'Quant/Unit', 'Price'])
         cursor.execute("SELECT DISTINCT SupplierID, CompanyName FROM suppliers;")
         df2 = pd.DataFrame(cursor.fetchall(), columns=['SID', 'Supplier Name'])
-    except Exception as e: 
-        print(e)
-        return False 
+
+    except Exception as e: print(e)
+
     else: 
         result = df.merge(df2, on='SID')
         result.drop(columns='SID', axis=1, inplace=True)
         print(result)
     
-    
-
 def DisplayCustByCompName(cursor):
-    return 
+    try:
+        query = f'SELECT DISTINCT CustomerID, CompanyName FROM customers;'
+        cursor.execute(query)
+        df = pd.DataFrame(cursor.fetchall(), columns=['CID', 'Company Name'])
+        print(f'\n{df}')
+
+        companyName = input("\nEnter company name to display all data: ")
+        query = f'SELECT * FROM customers WHERE CompanyName=\'{companyName.title()}\';'
+        cursor.execute(query)
+        row = cursor.fetchone()
+        address = str(row[4]) + " " + str(row[5]) + " " + str(row[7]) + " " + str(row[8])
+        data = [[row[0], row[1], row[2], row[3], address, row[9], row[10]]]
+        df = pd.DataFrame(data, columns=['CID', 'Company Name', 'Contact Name', 'Contact Title', 'Address', 'Phone #', 'Fax #'])
+        print(f'\n{df}')
+
+    except Exception as e: print(e)
+
+def DisplayEmployeeInfo(cursor):
+    def menu():
+        print(f'\n1. Display all info on specific employee\n2. Display heirarchy.\n3. Display hire dates.\n4. Return to main menu')
+        choice = int(input())
+        return choice 
+
+    try:
+        query = f'SELECT EmployeeID, LastName, FirstName, Title FROM employees;'
+        cursor.execute(query)
+
+        df = pd.DataFrame(cursor.fetchall(), columns=['EID', 'Last Name', 'First Name', 'Title'])
+        print(f'\n{df}')
+
+        while True:
+            choice = menu()
+            if choice == 1: 
+                print("\nEnter an employees ID number to retrieve more data. (or 0 to quit)")
+                eid = int(input())
+
+                query = f'SELECT EmployeeID, LastName, FirstName, Title, HireDate, Address, City, PostalCode, Country, HomePhone, Extension, Notes FROM employees WHERE EmployeeID=\'{eid}\';'
+                cursor.execute(query)
+
+                data = cursor.fetchone()
+                address = str(data[5]) + " " + str(data[6]) + " " + str(data[7]) + " " + str(data[8]) 
+                notes = str(data[11])
+                data = [[data[0], data[1], data[2], data[3], data[4], address, data[9], data[10]]]
+                
+                df = pd.DataFrame(data, columns=['EID', 'Last Name', 'First Name', 'Title', 'Hire Date', 'Address', 'Phone #', 'Ext.'])
+                print("-" * 100)
+                print(f'{df}\n\nNOTES\n{notes}')
+                print("-" * 100)
+            elif choice == 2:
+                query = f'SELECT EmployeeID, LastName, FirstName, Title FROM employees WHERE ReportsTo IS NULL;'
+                cursor.execute(query)
+                bossDf = pd.DataFrame([cursor.fetchone()], columns=['EID', 'Last Name', 'First Name', 'Title'])
+                print(f'\n{bossDf}')
+
+                query = f'SELECT EmployeeID, LastName, FirstName, Title FROM employees WHERE ReportsTo=2;'
+                cursor.execute(query)
+                midDf = pd.DataFrame(cursor.fetchall(), columns=['EID', 'Last Name', 'First Name', 'Title'])
+
+                cursor.execute('SELECT LastName, FirstName FROM employees WHERE EmployeeID=2')
+                midBossName = cursor.fetchone()
+                midBossName = str(midBossName[1]) + " " + str(midBossName[0])
+                print(f'\nThe below employees report to - {midBossName}\n\n{midDf}')
+
+                query = f'SELECT EmployeeID, LastName, FirstName, Title FROM employees WHERE ReportsTo=5;'
+                cursor.execute(query)
+                lowDf = pd.DataFrame(cursor.fetchall(), columns=['EID', 'Last Name', 'First Name', 'Title'])
+
+                cursor.execute('SELECT LastName, FirstName FROM employees WHERE EmployeeID=5;')
+                lowBossName = cursor.fetchone()
+                lowBossName = str(lowBossName[1]) + " " + str(lowBossName[0])
+                print(f'\nThe below employees report to - {lowBossName}\n\n{lowDf}')
+
+            elif choice == 3: 
+                cursor.execute('SELECT LastName, FirstName, Title, HireDate FROM employees ORDER BY HireDate;')
+                df = pd.DataFrame(cursor.fetchall(), columns=['Last Name', 'First Name', 'Title', 'Hire Date'])
+                print(df)
+                
+            elif choice == 4: 
+                return 
+           
+    except Exception as e: 
+        print(e)
+     
