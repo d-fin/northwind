@@ -54,7 +54,7 @@ def AddCustomer(cursor):
                 try: 
                     phone = str(input('Enter phone number: (numbers only) '))
                     fax = str(input('Enter fax number: (numbers only) '))
-                    if len(phone) == 10 or len(fax) == 10 or phone.isdigit() == True or fax.isdigit() == True:
+                    if len(phone) == 10 and len(fax) == 10 and phone.isdigit() == True and fax.isdigit() == True:
                         phone = '({}) {}-{}'.format(phone[:3], phone[3:6], phone[6:])
                         fax = '({}) {}-{}'.format(fax[:3], fax[3:6], fax[6:])
                         break 

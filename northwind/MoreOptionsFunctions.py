@@ -58,15 +58,21 @@ def DisplayCustByCompName(cursor):
         cursor.execute(query)
         df = pd.DataFrame(cursor.fetchall(), columns=['CID', 'Company Name'])
         print(f'\n{df.to_string(index=False)}')
-
-        companyName = input("\nEnter company name to display all data: ")
-        query = f'SELECT * FROM customers WHERE CompanyName=\'{companyName.title()}\';'
-        cursor.execute(query)
-        row = cursor.fetchone()
-        address = str(row[4]) + " " + str(row[5]) + " " + str(row[7]) + " " + str(row[8])
-        data = [[row[0], row[1], row[2], row[3], address, row[9], row[10]]]
-        df = pd.DataFrame(data, columns=['CID', 'Company Name', 'Contact Name', 'Contact Title', 'Address', 'Phone #', 'Fax #'])
-        print(f'\n{df.to_string(index=False)}')
+        while True: 
+            companyName = input("\nEnter company name to display all data: ")
+            companyName = companyName.title()
+            query = f'SELECT * FROM customers WHERE CompanyName=\'{companyName}\';'
+            cursor.execute(query)
+            row = cursor.fetchone()
+            if row == None: print(f'\n{companyName} is not a current company.')
+            else: 
+                address = str(row[4]) + " " + str(row[5]) + " " + str(row[7]) + " " + str(row[8])
+                data = [[row[0], row[1], row[2], row[3], address, row[9], row[10]]]
+                df = pd.DataFrame(data, columns=['CID', 'Company Name', 'Contact Name', 'Contact Title', 'Address', 'Phone #', 'Fax #'])
+                print(f'\n{df.to_string(index=False)}')
+                print("\nPress Enter to return to main menu...")
+                input()
+                break 
 
     except Exception as e: print(e)
 

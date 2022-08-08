@@ -2,7 +2,6 @@
 David Finley 
 DBMS Assignment 4 - Northwind 
 '''
-from curses.ascii import isdigit
 import mysql.connector as dbconn
 
 from UI import *
@@ -163,7 +162,10 @@ def GenerateInvoice(cursor):
     employeeQ = f'SELECT LastName, FirstName FROM employees WHERE EmployeeID={eid}'
     cursor.execute(employeeQ)
     employeeDf = pd.DataFrame(cursor.fetchall(), columns=['Last Name', 'First Name'])
+
     shippingCost = round((totalCost * .1), 2)
+    totalCost = round((totalCost), 2)
+    totalAndShipCost = round((shippingCost + totalCost), 2)
 
     print(f'\nINVOICE')
     print("-" * 60)
@@ -175,12 +177,14 @@ def GenerateInvoice(cursor):
     print("\nSales Representative\n" + employeeDf.to_string(index=False, header=False))
     print("\n\t\tPRODUCT ORDERED\n")
     print(order_detailsDf.to_string(index=False, header=False))
-    print(f'\nProduct:    ${totalCost:.2f}')
-    print(f'Shipping:    ${str(round((totalCost), 2)):.2f}')
-    print(f'Total:       ${str(round((shippingCost + totalCost), 2)):.2f}')
+    print(f'\nProduct:     ${totalCost:.2f}')
+    print(f'Shipping:    ${shippingCost:.2f}')
+    print(f'Total:       ${totalAndShipCost:.2f}')
     print("-" * 60)
     print(f'\nPress enter to send invoice...')
     input()
+    print("\nInvoice sent!")
+    return 
 
 
 if __name__ == '__main__':
