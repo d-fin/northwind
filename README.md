@@ -1,18 +1,8 @@
-# Northwind- A UI to interact with a database. 
+# Northwind
 
 # Installation Instructions 
-- Machine used is a mac running the latest version of MacOS
-
-# Install Python 
-- brew installs pip
-    ```
-    $ brew install python3
-    ```
-
-# Install mySQL Server 
-    ```
-    $ pip3 install mysql
-    ```
+- Machine used is a mac running the latest version of MacOS.
+- These install instructions assume python and mysql is installed. 
 
 # Install Python dependencies 
 - Navigate to the requirements.txt file in northwind project folder.
@@ -29,7 +19,7 @@
 
 - Navigate to sql file location 
     ```
-    mysql -u root -p northwind < northwind_assign4.sql
+    $ mysql -u root -p northwind < northwind_assign4.sql
     ```
 
 # Create User 
@@ -40,3 +30,7 @@
     ```
 
 # Run Instructions 
+- Navigate to project folder location in terminal and go to folder with 'main.py'.
+    ```
+    $ python3 main.py 
+    ```
